@@ -15,8 +15,12 @@ class AirportController extends Controller
      */
     public function index()
     {
-        $airports = Airport::all();
-        return response()->json(compact('airports'));
+        try {
+            $airports = Airport::all();
+            return response()->json(compact('airports'));
+        } catch(\Exception $e) {
+            return response()->json(['message' => $e->getMessage(), 'status' => 'error']);
+        }
     }
 
     /**
@@ -37,19 +41,23 @@ class AirportController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator ::make($request->all(), [
-            "name" => "required|string|max:60",
-            "code" => "required|string|unique:airports",
-            "city" => "required|string|max:60",
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        try {
+            $validator = Validator::make($request->all(), [
+                "name" => "required|string|max:60",
+                "code" => "required|string|unique:airports",
+                "city" => "required|string|max:60",
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 422);
+            }
+    
+            $airport = Airport::create($request->all());
+    
+            return response()->json(['message' => 'Airport created!', 'status' => 'success']);
+        } catch(\Exception $e) {
+            return response()->json(['message' => $e->getMessage(), 'status' => 'error']);
         }
-
-        $airport = Airport::create($request->all());
-        
-        return response()->json(['message' => 'Airport created!', 'status' => 'success']);
     }
 
     /**
@@ -60,7 +68,12 @@ class AirportController extends Controller
      */
     public function show($id)
     {
-        //
+        try {
+            $airport = Airport::find($id);
+            return response()->json(compact('airport'));
+        } catch(\Exception $e) {
+            return response()->json(['message' => $e->getMessage(), 'status' => 'error']);
+        }
     }
 
     /**
@@ -83,7 +96,28 @@ class AirportController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                "name" => "required|string|max:60",
+                "code" => "string|unique:airports",
+                "city" => "required|string|max:60",
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 422);
+            }
+    
+            $airport = Airport::find($id);
+            $airport->name = $request->name;
+            $airport->code = $request->code;
+            $airport->city = $request->city;
+    
+            $airport->save();
+    
+            return response()->json(['message' => 'Airport updated!', 'status' => 'success']);
+        } catch(\Exception $e) {
+            return response()->json(['message' => $e->getMessage(), 'status' => 'error']);
+        }
     }
 
     /**
@@ -94,6 +128,12 @@ class AirportController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            Airport::destroy($id);
+
+            return response()->json(['message' => 'Airport deleted!', 'status' => 'success']);
+        } catch(\Exception $e) {
+            return response()->json(['message' => $e->getMessage(), 'status' => 'error']);
+        }
     }
 }

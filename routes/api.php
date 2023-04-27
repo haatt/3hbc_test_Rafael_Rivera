@@ -27,11 +27,11 @@ Route::middleware([AuthenticateApi::class])->group(function() {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::resource('airports', AirportController::class)
-        ->only(['index', 'store', 'show', 'edit', 'update', 'destroy']);
+        ->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('airlines', AirlineController::class)
-        ->only(['index', 'store', 'show', 'edit', 'update', 'destroy']);
+        ->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('flights', FlightController::class)
-        ->only(['index', 'store', 'show', 'edit', 'update', 'destroy']);
+        ->only(['index', 'store', 'show', 'update', 'destroy']);
 });
 
 Route::post('/login', [AuthController::class, 'login']);
