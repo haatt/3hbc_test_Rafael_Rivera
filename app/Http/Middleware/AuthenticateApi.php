@@ -18,7 +18,7 @@ class AuthenticateApi
     public function handle(Request $request, Closure $next)
     {
         if (! Auth::guard('api')->check()) {
-            return response()->json(['message' => 'Unauthorized rarfaaaa'], 401);
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         return $next($request);

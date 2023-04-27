@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -72,9 +74,7 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        // return response()->json(compact('user', "rafaaaaaaaaaaaaaaaaaaaaaaaaaa"), 200);
-
-        $validator = Validator::make($request->all, [
+        $validator = Validator::make($request->all(), [
             "name" => "required|string|max:60",
             "email" => "required|string|email|unique:users",
             "password" => "required|string|min:4",
@@ -103,13 +103,25 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            $token = $user->createToken('TokenNameRafa')->accessToken;
-            return response()->json(['token' => $token], 200);
-        } else {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        try {
+            $credentials = $request->only('email', 'password');
+            if (!$token = JWTAuth::attempt($credentials)) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+            
+            return response()->json(compact('token'), 200);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Could not create token'], 500);
+        }   
+    }
+
+    public function logout()
+    {
+        try {
+            JWTAuth::parseToken()->invalidate();
+            return response()->json(['message' => 'You\'re logged out']);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Failed to logout.'], 500);
         }
     }
 }
